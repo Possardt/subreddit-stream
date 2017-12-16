@@ -3,6 +3,8 @@ const app         = express();
 const bodyParser  = require('body-parser');
 const server      = require('http').createServer(app);
 const io          = require('socket.io')(server);
+const redditApi   = require('./reddit');
+
 
 let redditNamespace;
 
@@ -16,6 +18,15 @@ if (process.env.NODE_ENV === "production") {
 }
 
 redditNamespace = io.of('/newPosts');
+
+setInterval(() => {
+  redditApi.getSubredditInfo('soccer')
+    .then(data => {
+      console.log(data);
+      redditNamespace.emit('posts', data);
+    });
+}, 10000);
+
 redditNamespace.on('connect', socket => {
   redditNamespace.emit('hello', {message : 'Hello curious traveler!'});
 });
