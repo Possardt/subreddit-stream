@@ -1,8 +1,14 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import { subscribeToSubredditStream } from './api'
 
 class App extends Component {
+  constructor(props){
+    super(props);
+
+    subscribeToSubredditStream((data) => console.log(data));
+  }
   render() {
     return (
       <div className="App">
