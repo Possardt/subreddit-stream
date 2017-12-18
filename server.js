@@ -4,9 +4,11 @@ const bodyParser  = require('body-parser');
 const server      = require('http').createServer(app);
 const io          = require('socket.io')(server);
 const redditApi   = require('./reddit');
+const _           = require('lodash');
 
 
-let redditNamespace;
+let redditNamespace,
+    lastSentPosts = [];
 
 app.use(bodyParser.json());
 app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
@@ -22,8 +24,10 @@ redditNamespace = io.of('/newPosts');
 setInterval(() => {
   redditApi.getSubredditInfo('soccer')
     .then(data => {
-      console.log(data);
-      redditNamespace.emit('posts', data);
+      let newPosts = _.difference(data, lastSentPosts);
+      console.log('new posts : ' + newPosts);
+      redditNamespace.emit('posts', newPosts);
+      lastSentPosts = lastSentPosts.concat(newPosts);
     });
 }, 10000);
 
